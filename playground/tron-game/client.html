@@ -25,71 +25,102 @@
 
     function createGame() {
       const state = {
-        players: {
-          player1: { x: 1, y: 1 },
-          player2: { x: 9, y: 9 },
-        },
-        fruits: {
-          fruit1: { x: 3, y: 1 },
-        },
+        players: {},
+        fruits: {},
       };
+
+      function addPlayer(command) {
+        const playerId = command.playerId;
+        const playerX = command.playerX;
+        const playerY = command.playerY;
+
+        state.players[playerId] = {
+          x: playerX,
+          y: playerY,
+        };
+      }
+
+      function removePlayer(command) {
+        const playerId = command.playerId;
+
+        delete state.players[playerId];
+      }
+
+      function addFruit(command) {
+        const fruitId = command.fruitId;
+        const fruitX = command.fruitX;
+        const fruitY = command.fruitY;
+
+        state.fruits[fruitId] = {
+          x: fruitX,
+          y: fruitY,
+        };
+      }
+
+      function removeFruit(command) {
+        const fruitId = command.fruitId;
+
+        delete state.fruits[fruitId];
+      }
 
       function movePlayer(command) {
         const acceptedMoves = {
-          ArrowUp() {
+          ArrowUp(player) {
             if (player.y - 1 >= 0) player.y = player.y - 1;
             return;
           },
-          ArrowDown() {
+          ArrowDown(player) {
             if (player.y + 1 < screen.height) player.y = player.y + 1;
             return;
           },
-          ArrowRight() {
+          ArrowRight(player) {
             if (player.x + 1 < screen.width) player.x = player.x + 1;
             return;
           },
-          ArrowLeft() {
+          ArrowLeft(player) {
             if (player.x - 1 >= 0) player.x = player.x - 1;
             return;
           },
         };
 
-        console.log(
-          `game.movePlayer -> Moving ${command.playerId} with ${command.keyPressed}`
-        );
-
         const keyPressed = command.keyPressed;
-        const player = command.playerId;
+        const playerId = command.playerId;
+        const player = state.players[playerId];
         const moveFunction = acceptedMoves[keyPressed];
-        if (moveFunction) {
-          moveFunction();
+        if (player && moveFunction) {
+          moveFunction(player);
+          checkForFruitCollision(playerId);
         }
+      }
 
-        /* if (keyPressed === "ArrowUp" && player.y - 1 >= 0) {
-          player.y = player.y - 1;
-          return;
+      function checkForFruitCollision(playerId) {
+        const player = state.players[playerId];
+
+        for (const fruitId in state.fruits) {
+          const fruit = state.fruits[fruitId];
+
+          if (player.x === fruit.x && player.y === fruit.y) {
+            console.log("colision");
+            removeFruit({ fruitId: fruitId });
+          }
         }
-        if (keyPressed === "ArrowDown" && player.y + 1 < screen.height) {
-          player.y = player.y + 1;
-          return;
-        }
-        if (keyPressed === "ArrowRight" && player.x + 1 < screen.width) {
-          player.x = player.x + 1;
-          return;
-        }
-        if (keyPressed === "ArrowLeft" && player.x - 1 >= 0) {
-          player.x = player.x - 1;
-          return;
-        } */
       }
 
       return {
+        addPlayer,
+        removePlayer,
+        addFruit,
+        removeFruit,
         movePlayer,
         state,
       };
     }
 
     const game = createGame();
+    game.addPlayer({ playerId: "player1", playerX: 0, playerY: 0 });
+    game.addPlayer({ playerId: "player2", playerX: 9, playerY: 1 });
+    game.addFruit({ fruitId: "fruit1", fruitX: 3, fruitY: 3 });
+    game.addFruit({ fruitId: "fruit2", fruitX: 6, fruitY: 6 });
     const keyboardListener = createKeyboardListener();
     keyboardListener.subscribe(game.movePlayer);
 
@@ -103,9 +134,6 @@
       }
 
       function notifyAll(command) {
-        console.log(
-          `keyboardListener -> Notifying ${state.observers.length} observers`
-        );
         for (observerFunction of state.observers) {
           observerFunction(command);
         }
@@ -116,7 +144,7 @@
       function handleKeyDown(event) {
         const keyPressed = event.key;
         const command = {
-          playerId: game.state.players.player1,
+          playerId: "player1",
           keyPressed,
         };
 
