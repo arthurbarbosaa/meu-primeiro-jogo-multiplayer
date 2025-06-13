@@ -15,6 +15,7 @@
         height: 400px;
       }
     </style>
+    <script src="/socket.io/socket.io.js "></script>
   </head>
   <body>
     <canvas id="screen" width="10" height="10"></canvas>
@@ -28,13 +29,23 @@
     const context = screen.getContext("2d");
 
     const game = createGame();
-    game.addPlayer({ playerId: "player1", playerX: 0, playerY: 0 });
-    game.addPlayer({ playerId: "player2", playerX: 9, playerY: 1 });
-    game.addFruit({ fruitId: "fruit1", fruitX: 3, fruitY: 3 });
-    game.addFruit({ fruitId: "fruit2", fruitX: 6, fruitY: 6 });
     const keyboardListener = createKeyboardListener(document);
     keyboardListener.subscribe(game.movePlayer);
 
     renderScreen(screen, game, requestAnimationFrame);
+
+    const socket = io();
+
+    socket.on("connect", () => {
+      const playerId = socket.id;
+      console.log(`Player connected on Client with id: ${playerId}`);
+    });
+
+    socket.on("setup", (state) => {
+      console.log("Reciving 'setup' event from server");
+      console.log(state);
+
+      game.state = state;
+    });
   </script>
 </html>
