@@ -77,6 +77,8 @@ export default function createGame() {
   }
 
   function movePlayer(command) {
+    notifyAll(command);
+
     const acceptedMoves = {
       ArrowUp(player) {
         if (player.y - 1 >= 0) player.y = player.y - 1;
