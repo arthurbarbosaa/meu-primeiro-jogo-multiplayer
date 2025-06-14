@@ -30,7 +30,6 @@
 
     const game = createGame();
     const keyboardListener = createKeyboardListener(document);
-    keyboardListener.subscribe(game.movePlayer);
 
     renderScreen(screen, game, requestAnimationFrame);
 
@@ -42,10 +41,21 @@
     });
 
     socket.on("setup", (state) => {
-      console.log("Reciving 'setup' event from server");
-      console.log(state);
+      const playerId = socket.id;
+      game.setState(state);
 
-      game.state = state;
+      keyboardListener.registerPlayerId(playerId);
+      keyboardListener.subscribe(game.movePlayer);
+    });
+
+    socket.on("add-player", (command) => {
+      console.log(`Reciving ${command.type} -> ${command.playerId}`);
+      game.addPlayer(command);
+    });
+
+    socket.on("remove-player", (command) => {
+      console.log(`Reciving ${command.type} -> ${command.playerId}`);
+      game.removePlayer(command);
     });
   </script>
 </html>
