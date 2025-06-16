@@ -22,6 +22,7 @@ sockets.on("connect", (socket) => {
   console.log(`> Player connected on Server: ${playerId}`);
 
   game.addPlayer({ playerId: playerId });
+  game.start();
 
   socket.emit("setup", game.state);
 

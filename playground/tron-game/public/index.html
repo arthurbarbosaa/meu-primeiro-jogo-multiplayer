@@ -69,5 +69,15 @@
         game.movePlayer(command);
       }
     });
+
+    socket.on("add-fruit", (command) => {
+      console.log(`Reciving ${command.type} -> ${command.playerId}`);
+      game.addFruit(command);
+    });
+
+    socket.on("remove-fruit", (command) => {
+      console.log(`Reciving ${command.type} -> ${command.playerId}`);
+      game.removeFruit(command);
+    });
   </script>
 </html>
