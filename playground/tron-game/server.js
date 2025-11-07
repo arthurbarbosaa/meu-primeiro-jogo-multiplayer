@@ -10,6 +10,7 @@ const sockets = new Server(server);
 app.use(express.static("public"));
 
 const game = createGame();
+game.start();
 console.log(game.state);
 
 game.subscribe((command) => {
@@ -22,7 +23,6 @@ sockets.on("connect", (socket) => {
   console.log(`> Player connected on Server: ${playerId}`);
 
   game.addPlayer({ playerId: playerId });
-  game.start();
 
   socket.emit("setup", game.state);
 

@@ -27,6 +27,34 @@ export default function renderScreen(
     context.fillRect(currentPlayer.x, currentPlayer.y, 1, 1);
   }
 
+  updateScoreboard(game, currentplayerId);
+
+  function updateScoreboard(game, currentplayerId) {
+    const scoreboardBody = document.getElementById("scoreboard-body");
+    if (scoreboardBody) {
+      const rows = [];
+      for (const playerId in game.state.players) {
+        const player = game.state.players[playerId];
+        const playerScore = player.score || 0;
+        const isCurrent = playerId === currentplayerId;
+        rows.push({ playerId, playerScore, isCurrent });
+      }
+
+      rows.sort((a, b) => b.playerScore - a.playerScore);
+
+      scoreboardBody.innerHTML = rows
+        .map(
+          (r) => `
+            <tr ${r.isCurrent ? 'style="background:#F0DB4F"' : ""}>
+              <td>${r.playerId}</td>
+              <td>${r.playerScore}</td>
+            </tr>
+          `
+        )
+        .join("");
+    }
+  }
+
   requestAnimationFrame(() => {
     renderScreen(screen, game, requestAnimationFrame, currentplayerId);
   });

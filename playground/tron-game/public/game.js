@@ -44,6 +44,7 @@ export default function createGame() {
     state.players[playerId] = {
       x: playerX,
       y: playerY,
+      score: 0,
     };
 
     notifyAll({
@@ -141,6 +142,8 @@ export default function createGame() {
       if (player.x === fruit.x && player.y === fruit.y) {
         console.log("colision");
         removeFruit({ fruitId: fruitId });
+        player.score = player.score + 1;
+        console.log(state.players);
       }
     }
   }

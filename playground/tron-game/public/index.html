@@ -6,6 +6,20 @@
     <title>Tron Game</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
+      body {
+        height: 100vh;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #game-container {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+      }
+
       #screen {
         border: 10px solid #ccc;
         image-rendering: pixelated;
@@ -14,11 +28,58 @@
         width: 400px;
         height: 400px;
       }
+
+      #scoreboard {
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial;
+        background: #fafafa;
+        border: 1px solid #ddd;
+        padding: 12px;
+        border-radius: 6px;
+        min-width: 200px;
+      }
+
+      #scoreboard h3 {
+        margin: 0 0 8px 0;
+        font-size: 16px;
+      }
+
+      #scoreboard table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      #scoreboard th,
+      #scoreboard td {
+        text-align: left;
+        padding: 4px 6px;
+        border-bottom: 1px solid #eee;
+        font-size: 14px;
+      }
+
+      #scoreboard tbody tr:last-child td {
+        border-bottom: none;
+      }
     </style>
     <script src="/socket.io/socket.io.js "></script>
   </head>
   <body>
-    <canvas id="screen" width="10" height="10"></canvas>
+    <div id="game-container">
+      <canvas id="screen" width="10" height="10"></canvas>
+
+      <div id="scoreboard" aria-live="polite">
+        <h3>Scoreboard</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>playerId</th>
+              <th>score</th>
+            </tr>
+          </thead>
+          <tbody id="scoreboard-body"></tbody>
+        </table>
+      </div>
+    </div>
   </body>
   <script type="module">
     import createKeyboardListener from "./keyboard-listener.js";
@@ -71,12 +132,12 @@
     });
 
     socket.on("add-fruit", (command) => {
-      console.log(`Reciving ${command.type} -> ${command.playerId}`);
+      console.log(`Reciving ${command.type} -> ${command.fruitId}`);
       game.addFruit(command);
     });
 
     socket.on("remove-fruit", (command) => {
-      console.log(`Reciving ${command.type} -> ${command.playerId}`);
+      console.log(`Reciving ${command.type} -> ${command.fruitId}`);
       game.removeFruit(command);
     });
   </script>
