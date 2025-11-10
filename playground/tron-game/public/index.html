@@ -60,6 +60,43 @@
       #scoreboard tbody tr:last-child td {
         border-bottom: none;
       }
+
+      /* Admin panel styles */
+      #admin-panel {
+        display: none;
+        margin-top: 16px;
+        padding: 12px;
+        background: #efefef;
+        border: 1px solid #fbfbfbc8;
+        border-radius: 6px;
+      }
+
+      #admin-panel h4 {
+        margin: 0 0 8px 0;
+        font-size: 14px;
+        color: #4b4a48;
+      }
+
+      #admin-panel button {
+        display: block;
+        width: 100%;
+        margin: 4px 0;
+        padding: 6px 12px;
+        font-size: 13px;
+        background: #fbfbfbc8;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+
+      #admin-panel button:hover {
+        background: #f0db4f;
+      }
+
+      #admin-panel button:active {
+        background: #f0db4f;
+      }
     </style>
     <script src="/socket.io/socket.io.js "></script>
   </head>
@@ -78,6 +115,15 @@
           </thead>
           <tbody id="scoreboard-body"></tbody>
         </table>
+
+        <!-- Admin panel (visible only for admin) -->
+        <div id="admin-panel">
+          <h4>🔑 Admin Controls</h4>
+          <button id="btn-start-fruits">▶️ Start Fruits</button>
+          <button id="btn-stop-fruits">⏸️ Stop Fruits</button>
+          <button id="btn-clear-scores">🔄 Clear Scores</button>
+          <button id="btn-reset-game">🔴 Reset Game</button>
+        </div>
       </div>
     </div>
   </body>
@@ -140,5 +186,67 @@
       console.log(`Reciving ${command.type} -> ${command.fruitId}`);
       game.removeFruit(command);
     });
+
+    const adminPanel = document.getElementById("admin-panel");
+    const btnStartFruits = document.getElementById("btn-start-fruits");
+    const btnStopFruits = document.getElementById("btn-stop-fruits");
+    const btnClearScores = document.getElementById("btn-clear-scores");
+    const btnResetGame = document.getElementById("btn-reset-game");
+
+    socket.on("admin-assigned", () => {
+      console.log("You are now the admin!");
+      adminPanel.style.display = "block";
+    });
+
+    socket.on("admin-update", (data) => {
+      console.log(`Admin is now: ${data.adminId}`);
+      if (socket.id !== data.adminId) {
+        adminPanel.style.display = "none";
+      }
+    });
+
+    socket.on("admin-error", (data) => {
+      console.error("Admin error:", data.message);
+      alert("Admin error: " + data.message);
+    });
+
+    socket.on("fruits-started", () => {
+      console.log("Fruit spawn started by admin");
+    });
+
+    socket.on("fruits-stopped", () => {
+      console.log("Fruit spawn stopped by admin");
+    });
+
+    socket.on("game-reset", (state) => {
+      console.log("Game reset by admin");
+      game.setState(state);
+      adminPanel.style.display = "none";
+    });
+
+    socket.on("scores-cleared", (state) => {
+      console.log("Scores cleared by admin");
+      game.setState(state);
+    });
+
+    btnStartFruits.onclick = () => {
+      socket.emit("admin-command", { action: "start-fruits" });
+    };
+
+    btnStopFruits.onclick = () => {
+      socket.emit("admin-command", { action: "stop-fruits" });
+    };
+
+    btnClearScores.onclick = () => {
+      if (confirm("Clear all player scores?")) {
+        socket.emit("admin-command", { action: "clear-scores" });
+      }
+    };
+
+    btnResetGame.onclick = () => {
+      if (confirm("Reset the entire game? All players will be disconnected.")) {
+        socket.emit("admin-command", { action: "reset-game" });
+      }
+    };
   </script>
 </html>
