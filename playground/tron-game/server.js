@@ -1,6 +1,7 @@
 import express from "express";
 import http from "http";
 import createGame from "./public/game.js";
+import createMetrics from "./public/metrics.js";
 import { Server } from "socket.io";
 
 const app = express();
@@ -10,18 +11,23 @@ const sockets = new Server(server);
 app.use(express.static("public"));
 
 const game = createGame();
+const metrics = createMetrics();
+
+console.log(game.state);
+
 let adminId = null;
 let fruitInterval = null;
 const FRUIT_FREQUENCY = 2000;
-
-console.log(game.state);
 
 game.subscribe((command) => {
   console.log(`> Emitting ${command.type}`);
   sockets.emit(command.type, command);
 });
 
-// Admin & fruit spawn control functions
+game.subscribe((command) => {
+  metrics.handleGameNotification(command);
+});
+
 function startFruitSpawn() {
   if (!fruitInterval) {
     fruitInterval = setInterval(() => game.addFruit(), FRUIT_FREQUENCY);
