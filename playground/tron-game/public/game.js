@@ -135,20 +135,14 @@ export default function createGame() {
 
   function checkForFruitCollision(playerId) {
     const player = state.players[playerId];
-
     for (const fruitId in state.fruits) {
       const fruit = state.fruits[fruitId];
 
-      if (
-        player.x === fruit.x &&
-        player.y === fruit.y &&
-        fruit.consumed !== true
-      ) {
-        console.log("colision");
-        fruit.consumed = true;
-        removeFruit({ fruitId: fruitId });
-        player.score = player.score + 1;
-        console.log(state.players);
+      if (player.x === fruit.x && player.y === fruit.y && !fruit.pending) {
+        fruit.pending = true;
+
+        socket.emit("try-collect-fruit", { fruitId });
+        break;
       }
     }
   }
