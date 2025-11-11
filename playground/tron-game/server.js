@@ -109,13 +109,6 @@ sockets.on("connect", (socket) => {
     }
   });
 
-  socket.on("fruit-collected", ({ playerId, fruitId, score }) => {
-    delete game.state.fruits[fruitId];
-    if (game.state.players[playerId]) {
-      game.state.players[playerId].score = score;
-    }
-  });
-
   // handle admin commands
   socket.on("admin-command", (cmd) => {
     if (socket.id !== adminId) {
