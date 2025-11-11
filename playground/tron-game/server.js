@@ -89,26 +89,6 @@ sockets.on("connect", (socket) => {
     game.movePlayer(command);
   });
 
-  socket.on("try-collect-fruit", (data) => {
-    const { fruitId } = data;
-    const player = game.state.players[socket.id];
-    const fruit = game.state.fruits[fruitId];
-
-    if (player && fruit) {
-      // Se fruta ainda existe, concede ponto e remove
-      game.removeFruit({ fruitId });
-      player.score++;
-      sockets.emit("fruit-collected", {
-        playerId: socket.id,
-        fruitId,
-        score: player.score,
-      });
-    } else {
-      // Fruta já foi pega por outro
-      socket.emit("fruit-failed", { fruitId });
-    }
-  });
-
   // handle admin commands
   socket.on("admin-command", (cmd) => {
     if (socket.id !== adminId) {
